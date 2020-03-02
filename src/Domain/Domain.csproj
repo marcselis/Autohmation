@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Domain</RootNamespace>
+    <LangVersion>8.0</LangVersion>
+    <Copyright>©2020 by Marc Selis</Copyright>
+    <RepositoryUrl>https://github.com/marcselis/Autohmation</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageProjectUrl>https://github.com/marcselis/Autohmation</PackageProjectUrl>
+    <PackageLicenseFile>agpl-3.0.txt</PackageLicenseFile>
+    <Authors>Marc Selis</Authors>
+    <Company />
+    <Product>Autohmation</Product>
+    <Description>Autohmation backend domain</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="MemBus" Version="4.0.1" />
+    <PackageReference Include="System.IO.Ports" Version="4.7.0" />
+    <PackageReference Include="System.Memory" Version="4.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\agpl-3.0.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
