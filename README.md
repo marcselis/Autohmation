@@ -21,7 +21,7 @@ WORK IN PROGESS: items striked-through are (more or less) done.
 
 ---
 
-1. ~~Build the backend components that do the actual work.~~
+1. ~~Build the backend components that do the actual work and provide a little test setup in code.~~
 2. Configure my complete system in code.
 3. Build a simple responsive web GUI to enable controlling the lights from any device (PC, tablet, phone) connected to our wifi network, to make my wife happy ;-)
 4. Add support for some automation tasks (turning lights on at dusk and off again at dawn) in code.
