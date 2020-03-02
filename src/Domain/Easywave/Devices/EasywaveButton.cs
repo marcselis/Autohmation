@@ -34,9 +34,19 @@ namespace Domain
 
         public event EventHandler<string> NameChanged;
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
-            //nothing to dispose
+            //Nothing to dispose
+        }
+
+        public void Start()
+        {
+            //Nothing to do
+        }
+
+        public void Stop()
+        {
+            //Nothing to do
         }
     }
 }

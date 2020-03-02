@@ -1,20 +1,35 @@
 ﻿using log4net;
 using MemBus;
+using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Domain
 {
-    public class EasywaveDeviceManager : IService
+    public class EasywaveDeviceManager : AutohmationService
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(EasywaveDeviceManager));
-        private readonly IDeviceList _devices;
+        private readonly ICanStartAndStopList<IDevice> _devices;
         private readonly IBus _bus;
+        private IDisposable _subscription;
 
-        public EasywaveDeviceManager(IBus bus, IDeviceList deviceList)
+        public EasywaveDeviceManager(IServiceProvider services) : base(services)
         {
-            _bus = bus;
-            _devices = deviceList;
-            _bus.Subscribe((EasywaveTelegram telegram) => CheckEasywaveButtonExists(telegram));
+            _bus = services.GetService<IBus>();
+            _devices = services.GetService<ICanStartAndStopList<IDevice>>();
+        }
+
+        public override void Start()
+        {
+            Log.Debug("EasywaveDeviceManager is starting...");
+            _subscription = _bus.Subscribe((EasywaveTelegram telegram) => CheckEasywaveButtonExists(telegram));
+        }
+
+        public override void Stop()
+        {
+            Log.Debug("EasywaveDeviceManager is stopping...");
+            _subscription?.Dispose();
+            _subscription = null;
         }
 
         private void CheckEasywaveButtonExists(EasywaveTelegram telegram)
@@ -27,7 +42,6 @@ namespace Domain
                 _devices.Add(device);
                 _bus.Publish(new DeviceAdded(device));
             }
-
         }
 
 

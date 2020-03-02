@@ -2,6 +2,7 @@
 using log4net.Repository;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Globalization;
 using System.Reflection;
 
 namespace DomainTestCore
@@ -94,7 +95,7 @@ namespace DomainTestCore
                 return true;
             }
 
-            return !(_name.ToLower().StartsWith("microsoft")
+            return !(_name.ToLower(CultureInfo.CurrentCulture).StartsWith("microsoft",StringComparison.OrdinalIgnoreCase)
                 || _name == "IdentityServer4.AccessTokenValidation.Infrastructure.NopAuthenticationMiddleware");
         }
     }

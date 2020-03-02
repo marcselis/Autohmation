@@ -1,8 +1,6 @@
 ﻿namespace Domain
 {
-    public interface IHouse
+    public interface IHouse : ICanStartAndStop
     {
-        void Start();
-        void Stop();
     }
 }

@@ -4,29 +4,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Domain
 {
-    public class SimpleReceiver : ISimpleEasywaveReceiver
+    public class EasywaveReceiver : AutohmationDevice, IOnOffDevice
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(SimpleReceiver));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(EasywaveReceiver));
         private readonly List<Subscription> _subscriptions = new List<Subscription>();
-        private bool _isDisposed;
         private State _state;
-        private readonly IDisposable _telegramSubscription;
-        private readonly IDisposable _onSubsciption;
-        private readonly IDisposable _offSubsciption;
+        private IDisposable _telegramSubscription;
+        private IDisposable _onSubsciption;
+        private IDisposable _offSubsciption;
         private readonly IBus _bus;
 
 
-        public SimpleReceiver(string name, IBus bus, params Subscription[] subscription)
+        public EasywaveReceiver(string name, IServiceProvider services, params Subscription[] subscription)
         {
             Name = name;
-            _bus = bus ?? throw new ArgumentNullException(nameof(bus));
+            _bus = services.GetService<IBus>();
             _subscriptions.AddRange(subscription);
-            _telegramSubscription = bus.Subscribe((EasywaveTelegram t) => Receive(t));
-            _onSubsciption = bus.Subscribe(async (RequestOn msg) => await ProcessOnRequestAsync(msg).ConfigureAwait(false));
-            _offSubsciption = bus.Subscribe(async (RequestOff msg) => await ProcessOffRequest(msg).ConfigureAwait(false));
         }
 
         public State State
@@ -52,13 +49,10 @@ namespace Domain
             }
         }
 
-        public string Name { get; }
+         public IEnumerable<IEasywaveSubscription> Subscriptions => _subscriptions;
 
 
-        public IEnumerable<IEasywaveSubscription> Subscriptions => _subscriptions;
-
-
-        public void Receive(EasywaveTelegram telegram)
+        private void Receive(EasywaveTelegram telegram)
         {
             if (_subscriptions.Any(s => s.Address == telegram.Address && s.KeyCode == telegram.KeyCode))
             {
@@ -106,17 +100,20 @@ namespace Domain
             await _bus.PublishAsync(new RequestTransmission { Telegram = new EasywaveTelegram(sub.Address, sub.KeyCode) }).ConfigureAwait(false);
         }
 
-        public void Dispose()
+        public override void Start()
         {
-            if (_isDisposed)
-            {
-                return;
-            }
+            Log.Debug($"{nameof(EasywaveReceiver)} {Name} is starting...");
+            _telegramSubscription = _bus.Subscribe((EasywaveTelegram t) => Receive(t));
+            _onSubsciption = _bus.Subscribe(async (RequestOn msg) => await ProcessOnRequestAsync(msg).ConfigureAwait(false));
+            _offSubsciption = _bus.Subscribe(async (RequestOff msg) => await ProcessOffRequest(msg).ConfigureAwait(false));
+        }
 
+        public override void Stop()
+        {
+            Log.Debug($"{nameof(EasywaveReceiver)} {Name} is stopping...");
             _telegramSubscription.Dispose();
             _onSubsciption.Dispose();
             _offSubsciption.Dispose();
-            _isDisposed = true;
         }
     }
 }

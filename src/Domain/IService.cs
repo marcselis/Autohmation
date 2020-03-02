@@ -1,7 +1,9 @@
-﻿namespace Domain
-{
-    public interface IService
-    {
+﻿using System;
 
+namespace Domain
+{
+    public interface IService : ICanStartAndStop,IDisposable
+    {
     }
+  
 }

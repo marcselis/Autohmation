@@ -1,5 +1,8 @@
 ﻿using Domain;
+using Domain.Services;
 using log4net.Config;
+using MemBus;
+using MemBus.Configurators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -10,7 +13,7 @@ namespace DomainTestCore
 {
     internal class Program
     {
-        public static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
@@ -28,8 +31,13 @@ namespace DomainTestCore
                 .ConfigureLogging(b => b.AddLog4Net(false))
                 .ConfigureServices((hostContext, services) =>
                     {
-                        services.AddHostedService<Worker>();
+                        //Configure the services needed to run everything
+                        services.AddSingleton(BusSetup.StartWith<Conservative>().Construct());
+                        services.AddSingleton<ICanStartAndStopList<IService>, AutohmationList<IService>>();
+                        services.AddSingleton<ICanStartAndStopList<IDevice>, AutohmationList<IDevice>>();
                         services.AddSingleton<IHouse, VirtualHouse>();
+                        //Add the worker service
+                        services.AddHostedService<Worker>();
                     });
         }
 

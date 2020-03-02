@@ -1,5 +1,6 @@
 ﻿using log4net;
 using MemBus;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Globalization;
 using System.IO.Ports;
@@ -14,7 +15,7 @@ namespace Domain
     /// You need to have the Eldat driver installed in order for this to work.
     /// <see cref="https://www.eldat.de/produkte/_div/rx09e_USBTcEasywaveInstall_XP_Win7.zip"/>
     /// </remarks>
-    public sealed class EldatRx09Transceiver : IEasywaveTransceiver
+    public sealed class EldatRx09Transceiver : AutohmationService
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(EldatRx09Transceiver));
         private readonly IBus _bus;
@@ -22,20 +23,35 @@ namespace Domain
         private bool _isOpen;
         private SerialPort _port;
         private string buffer = string.Empty;
-        private bool _isDisposed = false;
+        private IDisposable _subscription;
 
-        public EldatRx09Transceiver(string port, IBus bus)
+        public EldatRx09Transceiver(string port, IServiceProvider services) : base(services)
         {
             if (string.IsNullOrWhiteSpace(port))
+            {
                 throw new ArgumentNullException(nameof(port));
-            _bus = bus ?? throw new ArgumentNullException(nameof(bus));
+            }
+
+            _bus = services.GetService<IBus>();
             _portName = port;
-            bus.Subscribe(async (RequestTransmission req) => await TransmitAsync(req.Telegram).ConfigureAwait(false));
+        }
+
+        public override void Start()
+        {
+            Log.Debug("EldatRx09Transceiver is starting...");
+            _subscription = _bus.Subscribe(async (RequestTransmission req) => await TransmitAsync(req.Telegram).ConfigureAwait(false));
             Open();
         }
 
-        public string Name { get { return "RX09"; } }
- 
+        public override void Stop()
+        {
+            Log.Debug("EldatRx09Transceiver is stopping...");
+            _subscription?.Dispose();
+            _subscription = null;
+            Close();
+        }
+
+
         /// <summary>
         /// Gets the vendor id of the transceiver.
         /// </summary>
@@ -76,11 +92,17 @@ namespace Domain
         public async Task TransmitAsync(EasywaveTelegram message)
         {
             if (!_isOpen)
+            {
                 throw new NotSupportedException("Open the transceiver before transmitting");
+            }
+
             if (message.Address >= AddressCount)
+            {
                 throw new ArgumentOutOfRangeException(nameof(message.Address),
                     $"Cannot transmit to address {message.Address}.  The adapter only supports {AddressCount} addresses.");
-            var text = $"TXP,{message.Address:x2},{message.KeyCode}\r";
+            }
+
+            string text = $"TXP,{message.Address:x2},{message.KeyCode}\r";
             Log.Debug(">" + text);
             _port.Write(text);
             await _bus.PublishAsync(message).ConfigureAwait(false);
@@ -93,7 +115,7 @@ namespace Domain
         /// This method also initializes the AddressCount, VendorId, DeviceId & Version properties with the
         /// information returned from the device.
         /// </remarks>
-        public void Open()
+        private void Open()
         {
             _port = new SerialPort(_portName, 57600, Parity.None, 8, StopBits.One)
             {
@@ -115,9 +137,13 @@ namespace Domain
         /// <summary>
         /// Closes the transceiver so that it stops listening.
         /// </summary>
-        public void Close()
+        private void Close()
         {
-            if (!_isOpen) return;
+            if (!_isOpen)
+            {
+                return;
+            }
+
             _port.DataReceived -= DataReceived;
             _port.ErrorReceived -= ErrorReceived;
             _port.Close();
@@ -133,16 +159,16 @@ namespace Domain
         {
             if (e.EventType == SerialData.Chars) //no need to process if we received an EOF
             {
-                var port = (SerialPort)sender;
+                SerialPort port = (SerialPort)sender;
                 //Concat the new received characters to the unprocessed input of the previous read.
                 //There is very little chance that there will ever be any unprocessed input, but just to be sure...
                 buffer = string.Concat(buffer, port.ReadExisting());
                 ReadOnlySpan<char> input = buffer.AsSpan();
                 //Process the buffer line by line (each Easywave telegram ends with \r)
-                var pos = input.IndexOf('\r');
+                int pos = input.IndexOf('\r');
                 while (pos > 0)
                 {
-                    var line = input.Slice(0, pos + 1).ToString();
+                    string line = input.Slice(0, pos + 1).ToString();
                     ProcessLine(line);
                     input = input.Slice(pos + 1);
                     pos = input.IndexOf('\r');
@@ -154,9 +180,17 @@ namespace Domain
         private async void ProcessLine(string line)
         {
             Log.Debug($"<{line}");
-            if (string.IsNullOrWhiteSpace(line)) return;
-            var parts = line.Split(',', '\t', '\r');
-            if (parts.Length == 0) return;
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return;
+            }
+
+            string[] parts = line.Split(',', '\t', '\r');
+            if (parts.Length == 0)
+            {
+                return;
+            }
+
             switch (parts[0])
             {
                 case "ID":
@@ -170,8 +204,8 @@ namespace Domain
                     Log.Debug($"Transceiver has {AddressCount} addresses");
                     break;
                 case "REC":
-                    var address = uint.Parse(parts[1], NumberStyles.HexNumber);
-                    var code = (KeyCode)Enum.Parse(typeof(KeyCode), parts[2]);
+                    uint address = uint.Parse(parts[1], NumberStyles.HexNumber);
+                    KeyCode code = (KeyCode)Enum.Parse(typeof(KeyCode), parts[2]);
                     await _bus.PublishAsync(new EasywaveTelegram(address, code)).ConfigureAwait(false);
                     break;
                 case "OK":
@@ -181,22 +215,6 @@ namespace Domain
                     break;
             }
         }
-
-
-        /// <summary>
-        /// Frees up unmanaged resources
-        /// </summary>
-        public void Dispose()
-        {
-            //the simple form of the Dispose pattern is sufficient here as 
-            //the SerialPort we are using is a managed resource which
-            //holds an unmanaged resource.
-            if (_isDisposed) return;
-            if (_isOpen) Close();
-            _isDisposed = true;
-        }
-
-
 
     }
 

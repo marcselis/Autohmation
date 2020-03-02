@@ -1,5 +1,4 @@
-﻿using log4net.Config;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace DomainTestCore
 {

@@ -2,10 +2,7 @@
 
 namespace Domain
 {
-    public interface ISwitch
+    public interface ISwitch : ICanTurnOnAndOff
     {
-        State State { get; }
-        Task TurnOnAsync();
-        Task TurnOffAsync();
     }
 }
