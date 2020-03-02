@@ -21,12 +21,13 @@ WORK IN PROGESS: items striked-through are (more or less) done.
 
 ---
 
-1. ~~Build the backend components that do the actual work, based on configuration in code.~~
-2. Build a simple web GUI to be able control the lights from any device (PC, tablet, phone) connected to our wifi network, to make my wife happy ;-)
-3. Add support for some automation tasks (turning lights on at dusk and off again at dawn) in code.
-4. Load configuration from config file.
-5. Extend web GUI to be able to alter the configuration and restart the backend.
-6. ???
+1. ~~Build the backend components that do the actual work.~~
+2. Configure my complete system in code.
+3. Build a simple responsive web GUI to enable controlling the lights from any device (PC, tablet, phone) connected to our wifi network, to make my wife happy ;-)
+4. Add support for some automation tasks (turning lights on at dusk and off again at dawn) in code.
+5. Load configuration from config file.
+6. Extend web GUI to be able to alter the configuration and restart the backend.
+7. ???
 
 ## How to build
 I'm developing on Windows 10 in .NET Core 3.1 LTS using Visual Studio 2019 Enterprise edition.
