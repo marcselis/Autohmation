@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Domain.EasywaveButton">
+    <Position X="7.5" Y="9.5" Width="2.5" />
+    <Members>
+      <Field Name="_name" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAACAAAAAAAAAAAAQAAAAAAAACIAAAAAAIAAA=</HashCode>
+      <FileName>Easywave\Devices\EasywaveButton.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Domain.EasywaveReceiver">
+    <Position X="4.75" Y="9.25" Width="2" />
+    <Members>
+      <Field Name="_bus" Hidden="true" />
+      <Field Name="_offSubsciption" Hidden="true" />
+      <Field Name="_onSubsciption" Hidden="true" />
+      <Field Name="_state" Hidden="true" />
+      <Field Name="_subscriptions" Hidden="true" />
+      <Field Name="_telegramSubscription" Hidden="true" />
+      <Field Name="Log" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAACAAAIAACAAACAAAAAgAAAAQIBAFBIQAAQA=</HashCode>
+      <FileName>Easywave\Devices\EasywaveReceiver.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Domain.AutohmationDevice">
+    <Position X="5" Y="4" Width="1.5" />
+    <Members>
+      <Field Name="_isDisposed" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAASAAAAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>AutohmationDevice.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Domain.EldatRx09Transceiver">
+    <Position X="8.5" Y="5" Width="1.5" />
+    <Members>
+      <Field Name="_bus" Hidden="true" />
+      <Field Name="_isOpen" Hidden="true" />
+      <Field Name="_port" Hidden="true" />
+      <Field Name="_portName" Hidden="true" />
+      <Field Name="_subscription" Hidden="true" />
+      <Field Name="buffer" Hidden="true" />
+      <Field Name="Log" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>KAAIACAAACAAIIgAAAAAAAAABAgIAgAAMBBAAgCIAAA=</HashCode>
+      <FileName>Easywave\Services\EldatRx09Transceiver.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Domain.AutohmationService">
+    <Position X="8.5" Y="2.75" Width="1.75" />
+    <Members>
+      <Field Name="_isDisposed" Hidden="true" />
+      <Field Name="_services" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAQAAAAAACAAAAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>AutohmationService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Domain.Lamp">
+    <Position X="0.5" Y="8.75" Width="1.5" />
+    <Members>
+      <Field Name="_bus" Hidden="true" />
+      <Field Name="_offSubscription" Hidden="true" />
+      <Field Name="_onSubscription" Hidden="true" />
+      <Field Name="Log" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>IAAABQAAACAAAIAAAAAAAAAAAAgAAAAAMBAABAAAASA=</HashCode>
+      <FileName>Devices\Lamp.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Domain.IEasywaveButton">
+    <Position X="2.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Easywave\IEasywaveButton.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Domain.IDevice">
+    <Position X="2.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IDevice.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Domain.ICanStartAndStop">
+    <Position X="2.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>ICanStartAndStop.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.IDisposable">
+    <Position X="5" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Domain.IService">
+    <Position X="5" Y="2.5" Width="1.5" />
+    <InheritanceLine Type="Domain.ICanStartAndStop" ManuallyRouted="true">
+      <Path>
+        <Point X="3.5" Y="1.796" />
+        <Point X="3.5" Y="2.138" />
+        <Point X="5.75" Y="2.138" />
+        <Point X="5.75" Y="2.5" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Domain.IOnOffDevice">
+    <Position X="0.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IOnOffDevice.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Domain.ICanTurnOnAndOff">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAQA=</HashCode>
+      <FileName>ICanTurnOnAndOff.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Domain.ISwitchableDevice">
+    <Position X="0.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>ISwitchableDevice.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Domain.ISwitch">
+    <Position X="2.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ISwitch.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

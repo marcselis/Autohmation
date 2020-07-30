@@ -89,7 +89,7 @@ namespace Domain
         /// Any message that is transmitted is also raised as <see cref="TelegramReceived"/> to allow other interested 
         /// parties to be notified.
         /// </remarks>
-        public async Task TransmitAsync(EasywaveTelegram message)
+        public Task TransmitAsync(EasywaveTelegram message)
         {
             if (!_isOpen)
             {
@@ -105,7 +105,7 @@ namespace Domain
             string text = $"TXP,{message.Address:x2},{message.KeyCode}\r";
             Log.Debug(">" + text);
             _port.Write(text);
-            await _bus.PublishAsync(message).ConfigureAwait(false);
+            return _bus.PublishAsync(message);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Domain
                 DtrEnable = true,
                 RtsEnable = true
             };
-            _port.DataReceived += DataReceived;
+            _port.DataReceived += DataReceivedAsync;
             _port.ErrorReceived += ErrorReceived;
             _port.Open();
             //Ask for number of addresses and vendor/device id.
@@ -144,7 +144,7 @@ namespace Domain
                 return;
             }
 
-            _port.DataReceived -= DataReceived;
+            _port.DataReceived -= DataReceivedAsync;
             _port.ErrorReceived -= ErrorReceived;
             _port.Close();
             _port.Dispose();
@@ -155,7 +155,7 @@ namespace Domain
             Log.Debug($"Error received from serial port: {e.EventType}");
         }
 
-        private void DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private async void DataReceivedAsync(object sender, SerialDataReceivedEventArgs e)
         {
             if (e.EventType == SerialData.Chars) //no need to process if we received an EOF
             {
@@ -163,21 +163,21 @@ namespace Domain
                 //Concat the new received characters to the unprocessed input of the previous read.
                 //There is very little chance that there will ever be any unprocessed input, but just to be sure...
                 buffer = string.Concat(buffer, port.ReadExisting());
-                ReadOnlySpan<char> input = buffer.AsSpan();
+                string input = buffer;
                 //Process the buffer line by line (each Easywave telegram ends with \r)
                 int pos = input.IndexOf('\r');
                 while (pos > 0)
                 {
-                    string line = input.Slice(0, pos + 1).ToString();
-                    ProcessLine(line);
-                    input = input.Slice(pos + 1);
+                    string line = input.Substring(0, pos).ToString();
+                    await ProcessLine(line).ConfigureAwait(false);
+                    input = input.Substring(pos +1);
                     pos = input.IndexOf('\r');
                 }
                 buffer = input.ToString();
             }
         }
 
-        private async void ProcessLine(string line)
+        private async Task ProcessLine(string line)
         {
             Log.Debug($"<{line}");
             if (string.IsNullOrWhiteSpace(line))

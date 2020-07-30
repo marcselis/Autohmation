@@ -2,7 +2,7 @@
 
 namespace Domain
 {
-    public interface ISwitch : ICanTurnOnAndOff
+    public interface ISwitch : IOnOffDevice
     {
     }
 }

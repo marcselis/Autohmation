@@ -20,10 +20,16 @@ namespace Domain
             _devices.Add(new EasywaveButton(2258148, "Keuken1"));
             _devices.Add(new EasywaveButton(2267862, "Keuken2"));
             _devices.Add(new EasywaveButton(2270401, "Keuken3"));
-            _devices.Add(new EasywaveReceiver("Gootsteen", services, new Subscription(2258148, KeyCode.A), new Subscription(16, KeyCode.A, true)));
-            _devices.Add(new EasywaveReceiver("KeukenTafel", services, new Subscription(2258148, KeyCode.C), new Subscription(2270401, KeyCode.A)));
-            Lamp lamp = new Lamp("Gootsteen Keuken", services, "Gootsteen");
-            _devices.Add(lamp);
+            EasywaveReceiver gootsteen = new EasywaveReceiver("Gootsteen", services, new Subscription(2258148, KeyCode.A), new Subscription(16, KeyCode.A, true));
+            EasywaveReceiver keukentafel = new EasywaveReceiver("KeukenTafel", services, new Subscription(2258148, KeyCode.C), new Subscription(2270401, KeyCode.A));
+            EasywaveReceiver terras = new EasywaveReceiver("Terras", services, new Subscription(2267862, KeyCode.A));
+            _devices.Add(keukentafel);
+            _devices.Add(gootsteen);
+            _devices.Add(terras);
+            _devices.Add(new Lamp("Gootsteen lamp", services, gootsteen));
+            _devices.Add(new Lamp("Keukentafel lamp", services, keukentafel));
+            _devices.Add(new Lamp("Terras lamp", services, terras));
+
             //Test turning a lamp on
             //Task.Delay(10000).ContinueWith((t) => lamp.TurnOnAsync());
         }

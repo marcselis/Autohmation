@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Domain
 {
-    public class EasywaveReceiver : AutohmationDevice, IOnOffDevice
+    public class EasywaveReceiver : AutohmationDevice, ISwitch
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(EasywaveReceiver));
         private readonly List<Subscription> _subscriptions = new List<Subscription>();
@@ -71,7 +71,7 @@ namespace Domain
             await TurnOffAsync().ConfigureAwait(false);
         }
 
-        public async Task TurnOffAsync()
+        public Task TurnOffAsync()
         { 
             Subscription sub = _subscriptions.FirstOrDefault(s => s.IsFromTransceiver);
             if (sub == null)
@@ -80,7 +80,7 @@ namespace Domain
             }
             Log.Debug($"Receiver {Name} received request to turn off");
 
-            await _bus.PublishAsync(new RequestTransmission { Telegram = new EasywaveTelegram(sub.Address, sub.KeyCode + 1) }).ConfigureAwait(false);
+            return _bus.PublishAsync(new RequestTransmission { Telegram = new EasywaveTelegram(sub.Address, sub.KeyCode + 1) });
         }
 
         private async Task ProcessOnRequestAsync(RequestOn msg)
@@ -89,7 +89,7 @@ namespace Domain
             await TurnOnAsync().ConfigureAwait(false);
         }
 
-        public async Task TurnOnAsync()
+        public Task TurnOnAsync()
         { 
             Subscription sub = _subscriptions.FirstOrDefault(s => s.IsFromTransceiver);
             if (sub == null)
@@ -97,7 +97,7 @@ namespace Domain
                 throw new NotSupportedException("Receiver has no triggerable subscription");
             }
             Log.Debug($"Receiver {Name} received request to turn on");
-            await _bus.PublishAsync(new RequestTransmission { Telegram = new EasywaveTelegram(sub.Address, sub.KeyCode) }).ConfigureAwait(false);
+            return _bus.PublishAsync(new RequestTransmission { Telegram = new EasywaveTelegram(sub.Address, sub.KeyCode) });
         }
 
         public override void Start()

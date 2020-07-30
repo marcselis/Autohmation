@@ -38,7 +38,8 @@ namespace DomainTestCore
                         services.AddSingleton<IHouse, VirtualHouse>();
                         //Add the worker service
                         services.AddHostedService<Worker>();
-                    });
+                    })
+                .UseConsoleLifetime();
         }
 
     }

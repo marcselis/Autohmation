@@ -14,7 +14,7 @@ namespace Domain
         private IDisposable _onSubscription;
         private IDisposable _offSubscription;
 
-        public Lamp(string name, IServiceProvider services, string attatchedTo)
+        public Lamp(string name, IServiceProvider services, ISwitch attatchedTo)
         {
             Name = name;
             _bus = services.GetService<IBus>();
@@ -23,7 +23,7 @@ namespace Domain
 
         private void SetState(string name, State state)
         {
-            if (AttatchedTo != name)
+            if (AttatchedTo?.Name != name)
             {
                 return;
             }
@@ -34,34 +34,33 @@ namespace Domain
         }
 
 
-        public string AttatchedTo { get; set; }
+        public ISwitch AttatchedTo { get; set; }
 
         public State State { get; private set; } = State.Off;
 
         public event EventHandler<State> StateChanged;
 
 
-        public async Task TurnOnAsync()
+        public Task TurnOnAsync()
         {
-            if (State == State.On) return;
+            if (State == State.On) return Task.CompletedTask;
             Log.Debug($"Lamp {Name} is asked to turn on");
-            if (string.IsNullOrEmpty(AttatchedTo))
+            if (AttatchedTo==null)
             {
                 throw new NotSupportedException("Lamp not attached to switch");
             }
-
-            await _bus.PublishAsync(new RequestOn(AttatchedTo)).ConfigureAwait(false);
+            return AttatchedTo.TurnOnAsync();
         }
 
-        public async Task TurnOffAsync()
+        public Task TurnOffAsync()
         {
-            if (State == State.Off) return;
+            if (State == State.Off) return Task.CompletedTask;
             Log.Debug($"Lamp {Name} is asked to turn off");
-            if (string.IsNullOrEmpty(AttatchedTo))
+            if (AttatchedTo == null)
             {
                 throw new NotSupportedException("Lamp not attached to switch");
             }
-            await _bus.PublishAsync(new RequestOff(AttatchedTo)).ConfigureAwait(false);
+            return AttatchedTo.TurnOffAsync();
         }
 
         public override void Start()
