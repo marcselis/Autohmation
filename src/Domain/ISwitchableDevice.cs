@@ -1,7 +1,7 @@
 ﻿namespace Domain
 {
-    public interface ISwitchableDevice : IOnOffDevice
+    public interface ISwitchableDevice : ICanBeTurnedOnAndOffDevice
     {
-        ISwitch AttatchedTo { get; set; }
+        string AttachedTo { get; set; }
     }
 }

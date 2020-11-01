@@ -13,10 +13,10 @@ namespace Domain
         private readonly IBus _bus;
         private IDisposable _subscription;
 
-        public EasywaveDeviceManager(IServiceProvider services) : base(services)
+        public EasywaveDeviceManager(IBus bus, ICanStartAndStopList<IDevice> devices) 
         {
-            _bus = services.GetService<IBus>();
-            _devices = services.GetService<ICanStartAndStopList<IDevice>>();
+            _bus = bus;
+            _devices = devices;
         }
 
         public override void Start()

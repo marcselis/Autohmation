@@ -2,7 +2,6 @@
 using MemBus;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Domain
 {
@@ -14,16 +13,16 @@ namespace Domain
         private IDisposable _onSubscription;
         private IDisposable _offSubscription;
 
-        public Lamp(string name, IServiceProvider services, ISwitch attatchedTo)
+        public Lamp(string name, string attachedTo, IBus bus)
         {
             Name = name;
-            _bus = services.GetService<IBus>();
-            AttatchedTo = attatchedTo;
+            _bus = bus;
+            AttachedTo = attachedTo;
         }
 
         private void SetState(string name, State state)
         {
-            if (AttatchedTo?.Name != name)
+            if (AttachedTo != name)
             {
                 return;
             }
@@ -34,34 +33,12 @@ namespace Domain
         }
 
 
-        public ISwitch AttatchedTo { get; set; }
+        public string AttachedTo { get; set; }
 
         public State State { get; private set; } = State.Off;
 
         public event EventHandler<State> StateChanged;
 
-
-        public Task TurnOnAsync()
-        {
-            if (State == State.On) return Task.CompletedTask;
-            Log.Debug($"Lamp {Name} is asked to turn on");
-            if (AttatchedTo==null)
-            {
-                throw new NotSupportedException("Lamp not attached to switch");
-            }
-            return AttatchedTo.TurnOnAsync();
-        }
-
-        public Task TurnOffAsync()
-        {
-            if (State == State.Off) return Task.CompletedTask;
-            Log.Debug($"Lamp {Name} is asked to turn off");
-            if (AttatchedTo == null)
-            {
-                throw new NotSupportedException("Lamp not attached to switch");
-            }
-            return AttatchedTo.TurnOffAsync();
-        }
 
         public override void Start()
         {
@@ -75,6 +52,18 @@ namespace Domain
             Log.Debug($"Lamp {Name} is stopping...");
             _offSubscription?.Dispose();
             _onSubscription?.Dispose();
+        }
+
+        public Task TurnOnAsync()
+        {
+            if (State == State.On) return Task.CompletedTask;
+            return _bus.PublishAsync(new RequestOn(AttachedTo));
+        }
+
+        public Task TurnOffAsync()
+        {
+            if (State == State.Off) return Task.CompletedTask; ;
+            return _bus.PublishAsync(new RequestOff(AttachedTo));
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace DomainTestCore
 {
-    public class Log4NetProvider : ILoggerProvider
+    public sealed class Log4NetProvider : ILoggerProvider
     {
         private readonly bool _skipDiagnosticLogs;
         private readonly ConcurrentDictionary<string, ILogger> _loggers = new ConcurrentDictionary<string, ILogger>();

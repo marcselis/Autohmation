@@ -3,22 +3,22 @@ using System.Collections.Generic;
 
 namespace Domain.Services
 {
-    public class AutohmationList<T> : ICanStartAndStopList<T> where T : ICanStartAndStop
+    public class DeviceList<T> : ICanStartAndStopList<T> where T : IDevice
     {
-        private readonly List<T> _list = new List<T>();
+        private readonly Dictionary<string, T> _list = new Dictionary<string, T>();
         public void Add(T item)
         {
-            _list.Add(item);
+            _list.Add(item.Name, item);
         }
 
         public void Remove(T item)
         {
-            _list.Remove(item);
+            _list.Remove(item.Name);
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            return _list.GetEnumerator();
+            return _list.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -28,13 +28,13 @@ namespace Domain.Services
 
         public void Start()
         {
-            foreach (T item in _list)
+            foreach (T item in _list.Values)
                 item.Start();
         }
 
         public void Stop()
         {
-            foreach (T item in _list)
+            foreach (T item in _list.Values)
                 item.Stop();
         }
     }

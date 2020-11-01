@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Domain
 {
-    public interface ISwitch : IOnOffDevice
+    public interface ISwitch : ICanTurnOnAndOffDevice
     {
     }
 }

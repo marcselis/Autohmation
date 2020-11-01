@@ -33,8 +33,8 @@ namespace DomainTestCore
                     {
                         //Configure the services needed to run everything
                         services.AddSingleton(BusSetup.StartWith<Conservative>().Construct());
-                        services.AddSingleton<ICanStartAndStopList<IService>, AutohmationList<IService>>();
-                        services.AddSingleton<ICanStartAndStopList<IDevice>, AutohmationList<IDevice>>();
+                        services.AddSingleton<ICanStartAndStopList<IService>, ServiceList<IService>>();
+                        services.AddSingleton<ICanStartAndStopList<IDevice>, DeviceList<IDevice>>();
                         services.AddSingleton<IHouse, VirtualHouse>();
                         //Add the worker service
                         services.AddHostedService<Worker>();

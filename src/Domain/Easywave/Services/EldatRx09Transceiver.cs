@@ -25,14 +25,14 @@ namespace Domain
         private string buffer = string.Empty;
         private IDisposable _subscription;
 
-        public EldatRx09Transceiver(string port, IServiceProvider services) : base(services)
+        public EldatRx09Transceiver(string port, IBus bus) 
         {
             if (string.IsNullOrWhiteSpace(port))
             {
                 throw new ArgumentNullException(nameof(port));
             }
 
-            _bus = services.GetService<IBus>();
+            _bus = bus;
             _portName = port;
         }
 

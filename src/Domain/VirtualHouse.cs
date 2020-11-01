@@ -1,5 +1,5 @@
 ﻿using log4net;
-using Microsoft.Extensions.DependencyInjection;
+using MemBus;
 using System;
 
 namespace Domain
@@ -10,25 +10,39 @@ namespace Domain
         private readonly ICanStartAndStopList<IDevice> _devices;
         private readonly ICanStartAndStopList<IService> _services;
 
-        public VirtualHouse(IServiceProvider services)
+        public VirtualHouse(ICanStartAndStopList<IDevice> devices, ICanStartAndStopList<IService> services, IBus bus)
         {
-            _devices = services.GetService<ICanStartAndStopList<IDevice>>();
-            _services = services.GetService<ICanStartAndStopList<IService>>();
+            _devices = devices;
+            _services = services;
             //TODO: initialize from settings file
-            _services.Add(new EasywaveDeviceManager(services));
-            _services.Add(new EldatRx09Transceiver("COM3", services));
-            _devices.Add(new EasywaveButton(2258148, "Keuken1"));
-            _devices.Add(new EasywaveButton(2267862, "Keuken2"));
-            _devices.Add(new EasywaveButton(2270401, "Keuken3"));
-            EasywaveReceiver gootsteen = new EasywaveReceiver("Gootsteen", services, new Subscription(2258148, KeyCode.A), new Subscription(16, KeyCode.A, true));
-            EasywaveReceiver keukentafel = new EasywaveReceiver("KeukenTafel", services, new Subscription(2258148, KeyCode.C), new Subscription(2270401, KeyCode.A));
-            EasywaveReceiver terras = new EasywaveReceiver("Terras", services, new Subscription(2267862, KeyCode.A));
-            _devices.Add(keukentafel);
-            _devices.Add(gootsteen);
-            _devices.Add(terras);
-            _devices.Add(new Lamp("Gootsteen lamp", services, gootsteen));
-            _devices.Add(new Lamp("Keukentafel lamp", services, keukentafel));
-            _devices.Add(new Lamp("Terras lamp", services, terras));
+            var kitchenSink = new EasywaveReceiver("KitchenSink Receiver", bus, new Subscription(2258148, KeyCode.A), new Subscription(16, KeyCode.A, true));
+            var kitchenTable = new EasywaveReceiver("KitchenTable Receiver", bus, new Subscription(2258148, KeyCode.C), new Subscription(2270401, KeyCode.A));
+            var terrace = new EasywaveReceiver("Terrace Receiver", bus, new Subscription(2267862, KeyCode.A));
+            var hall = new EasywaveReceiver("Hall Receiver", bus);
+            var nightHall = new EasywaveReceiver("NightHall Receiver", bus);
+            var laundryRoom = new EasywaveReceiver("LaundryRoom Receiver", bus, new Subscription(2266558, KeyCode.A));
+            var bathRoom = new EasywaveReceiver("BathRoom Receiver", bus);
+            var masterBedRoom = new EasywaveReceiver("MasterBedRoom Receiver", bus);
+            var dressing = new EasywaveReceiver("Dressing Receiver", bus);
+            _devices.Add(kitchenTable);
+            _devices.Add(kitchenSink);
+            _devices.Add(terrace);
+            _devices.Add(hall);
+            _devices.Add(nightHall);
+            _devices.Add(laundryRoom);
+            _devices.Add(bathRoom);
+            _devices.Add(masterBedRoom);
+            _devices.Add(dressing);
+            _devices.Add(new EasywaveButton(2258148, "Kitchen1"));
+            _devices.Add(new EasywaveButton(2267862, "Kitchen2"));
+            _devices.Add(new EasywaveButton(2270401, "Kitchen3"));
+            _devices.Add(new EasywaveButton(2266558, "LaundryRoom1"));
+            _devices.Add(new Lamp("KitchenSink Light", kitchenSink.Name,bus));
+            _devices.Add(new Lamp("KitchenTable Light", kitchenTable.Name,bus));
+            _devices.Add(new Lamp("Terrace Light", terrace.Name,bus));
+            _devices.Add(new Lamp("Laundry room", laundryRoom.Name, bus));
+            _services.Add(new EasywaveDeviceManager(bus, _devices));
+            _services.Add(new EldatRx09Transceiver("COM3", bus));
 
             //Test turning a lamp on
             //Task.Delay(10000).ContinueWith((t) => lamp.TurnOnAsync());

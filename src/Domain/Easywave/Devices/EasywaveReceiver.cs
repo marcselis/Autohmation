@@ -19,10 +19,10 @@ namespace Domain
         private readonly IBus _bus;
 
 
-        public EasywaveReceiver(string name, IServiceProvider services, params Subscription[] subscription)
+        public EasywaveReceiver(string name, IBus bus, params Subscription[] subscription)
         {
             Name = name;
-            _bus = services.GetService<IBus>();
+            _bus = bus;
             _subscriptions.AddRange(subscription);
         }
 
