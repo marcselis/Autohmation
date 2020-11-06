@@ -1,10 +1,10 @@
-﻿using log4net;
-using MemBus;
+﻿using MemBus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using log4net;
 
 namespace Domain
 {

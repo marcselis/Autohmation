@@ -2,6 +2,6 @@
 {
     public interface IEasywaveButton : IDevice
     {
-        uint Address { get; }
+        uint Address { get; set; }
     }
 }

@@ -6,6 +6,7 @@ namespace Domain.Services
     public class DeviceList<T> : ICanStartAndStopList<T> where T : IDevice
     {
         private readonly Dictionary<string, T> _list = new Dictionary<string, T>();
+
         public void Add(T item)
         {
             _list.Add(item.Name, item);
@@ -37,6 +38,7 @@ namespace Domain.Services
             foreach (T item in _list.Values)
                 item.Stop();
         }
+
     }
 
 }

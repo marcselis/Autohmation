@@ -10,7 +10,7 @@ namespace Domain
         public string Name
         {
             get { return name; }
-            protected set
+            set
             {
                 if (name == value) return;
                 name = value;

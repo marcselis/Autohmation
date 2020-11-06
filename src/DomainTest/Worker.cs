@@ -11,14 +11,16 @@ namespace DomainTestCore
     {
         private readonly IHouse _house;
         private readonly ILogger<Worker> _logger;
+        private readonly IHostApplicationLifetime _lifetime;
         private Task _loop;
         private CancellationTokenSource _cancellationSource;
         private bool disposedValue;
 
-        public Worker(IHouse house, ILogger<Worker> logger)
+        public Worker(IHouse house, ILogger<Worker> logger, IHostApplicationLifetime lifetime)
         {
             _house = house;
             _logger = logger;
+            _lifetime = lifetime;
         }
     
         public Task StartAsync(CancellationToken cancellationToken)
@@ -35,6 +37,7 @@ namespace DomainTestCore
             _logger.LogInformation("Stopping worker");
             _house.Stop();
             _cancellationSource.Cancel();
+            _lifetime.StopApplication();
             return _loop;
         }
 

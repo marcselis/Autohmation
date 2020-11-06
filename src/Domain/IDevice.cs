@@ -10,7 +10,7 @@ namespace Domain
         /// <summary>
         /// Gets or sets the device name.
         /// </summary>
-        string Name { get; }
+        string Name { get; set; }
 
         event EventHandler<string> NameChanged;
     }

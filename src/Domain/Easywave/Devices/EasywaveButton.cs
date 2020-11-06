@@ -16,7 +16,7 @@ namespace Domain
             _name = name;
         }
 
-        public uint Address { get; }
+        public uint Address { get; set; }
         public string Name
         {
             get => _name;
