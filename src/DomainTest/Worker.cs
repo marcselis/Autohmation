@@ -28,7 +28,7 @@ namespace DomainTestCore
             _logger.LogInformation("Starting worker");
             _house.Start();
             _cancellationSource = new CancellationTokenSource();
-            _loop = Task.Run(() => MainLoop(_cancellationSource.Token));
+            _loop = Task.Run(() => MainLoop(_cancellationSource.Token), cancellationToken);
             return Task.CompletedTask;
         }
         
