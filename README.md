@@ -30,9 +30,9 @@ WORK IN PROGESS: items striked-through are (more or less) done.
 7. ???
 
 ## How to build
-I'm developing on Windows 10 in .NET Core 3.1 LTS using Visual Studio 2019 Enterprise edition.
+I'm developing on Windows 10 in .NET Core 5.0 using Visual Studio 2019 Enterprise edition.
 
-If you have the [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download/dotnet-core/3.1) installed you should also be able to use **free** tools like:
+If you have the [.NET Core 5.0 SDK](https://dotnet.microsoft.com/download/dotnet/5.0) installed you should also be able to use **free** tools like:
 * **dotnet cli** together with any text editor you like.
 * [Visual Studio Code](https://code.visualstudio.com/)
 * [Visual Studio Community Edition](https://visualstudio.microsoft.com/vs/community/)
