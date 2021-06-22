@@ -6,7 +6,7 @@
 
         public RequestOn(string switchName)
         {
-            this.SwitchName = switchName;
+            SwitchName = switchName;
         }
     }
 }

@@ -17,7 +17,11 @@ namespace Domain
             get { return _name; }
             set
             {
-                if (_name == value) return;
+                if (_name == value)
+                {
+                    return;
+                }
+
                 _name = value;
                 NameChanged?.Invoke(this, _name);
             }
@@ -27,7 +31,11 @@ namespace Domain
 
         public void Dispose()
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
+
             Stop();
             _isDisposed = true;
             GC.SuppressFinalize(this);

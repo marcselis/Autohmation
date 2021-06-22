@@ -30,13 +30,17 @@ namespace Domain.Services
         public void Start()
         {
             foreach (var item in _list)
+            {
                 item.Start();
+            }
         }
 
         public void Stop()
         {
             foreach (var item in _list)
+            {
                 item.Stop();
+            }
         }
     }
 

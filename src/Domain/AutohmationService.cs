@@ -9,9 +9,14 @@ namespace Domain
   
         public virtual void Dispose()
         {
-            if (_isDisposed) return;
+            if (_isDisposed)
+            {
+                return;
+            }
+
             Stop();
             _isDisposed = true;
+            GC.SuppressFinalize(this);
         }
 
         public abstract void Start();

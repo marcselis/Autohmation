@@ -12,7 +12,7 @@ namespace DomainTest
         private readonly string _name;
         private readonly ILog _log;
         private readonly bool _skipDiagnosticLogs;
-        private static readonly ILoggerRepository _loggerRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+        private readonly static ILoggerRepository _loggerRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
 
         public Log4NetLogger(string name, bool skipDiagnosticLogs)
         {
@@ -58,9 +58,13 @@ namespace DomainTest
                 throw new ArgumentNullException(nameof(formatter));
             }
 
-            string message = $"{formatter(state, exception)} {exception}";
+            var message = $"{formatter(state, exception)} {exception}";
 
-            if (string.IsNullOrEmpty(message)) return;
+            if (string.IsNullOrEmpty(message))
+            {
+                return;
+            }
+
             switch (logLevel)
             {
                 case LogLevel.Critical:

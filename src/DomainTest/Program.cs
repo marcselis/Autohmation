@@ -1,14 +1,10 @@
 ﻿using Domain;
-using Domain.Services;
 using log4net.Config;
 using MemBus;
 using MemBus.Configurators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
 using System;
-using System.IO;
-using System.Xml.Serialization;
 
 [assembly: XmlConfigurator(ConfigFile = "log4net.config")]
 

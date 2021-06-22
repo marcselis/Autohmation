@@ -3,14 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using log4net;
 
 namespace Domain
 {
     public class EasywaveReceiver : AutohmationDevice, ISwitch
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(EasywaveReceiver));
+        private readonly static ILog _log = LogManager.GetLogger(typeof(EasywaveReceiver));
         private readonly List<Subscription> _subscriptions = new List<Subscription>();
         private State _state;
         private IDisposable? _telegramSubscription;
@@ -36,7 +35,7 @@ namespace Domain
                 }
 
                 _state = value;
-                Log.Debug($"Receiver {Name} is switched {_state}");
+                _log.Debug($"Receiver {Name} is switched {_state}");
                 if (_state == State.On)
                 {
                     _bus.Publish(new SwitchedOn(Name));
@@ -47,9 +46,6 @@ namespace Domain
                 }
             }
         }
-
-        public IEnumerable<IEasywaveSubscription> Subscriptions => _subscriptions;
-
 
         private void Receive(EasywaveTelegram telegram)
         {
@@ -66,7 +62,11 @@ namespace Domain
 
         private async Task ProcessOffRequest(RequestOff msg)
         {
-            if (msg.SwitchName != Name) return;
+            if (msg.SwitchName != Name)
+            {
+                return;
+            }
+
             await TurnOffAsync().ConfigureAwait(false);
         }
 
@@ -77,14 +77,18 @@ namespace Domain
             {
                 throw new NotSupportedException("Receiver has no triggerable subscription");
             }
-            Log.Debug($"Receiver {Name} received request to turn off");
+            _log.Debug($"Receiver {Name} received request to turn off");
 
             return _bus.PublishAsync(new RequestTransmission { Telegram = new EasywaveTelegram(sub.Address, sub.KeyCode + 1) });
         }
 
         private async Task ProcessOnRequestAsync(RequestOn msg)
         {
-            if (msg.SwitchName != Name) return;
+            if (msg.SwitchName != Name)
+            {
+                return;
+            }
+
             await TurnOnAsync().ConfigureAwait(false);
         }
 
@@ -95,13 +99,13 @@ namespace Domain
             {
                 throw new NotSupportedException("Receiver has no triggerable subscription");
             }
-            Log.Debug($"Receiver {Name} received request to turn on");
+            _log.Debug($"Receiver {Name} received request to turn on");
             return _bus.PublishAsync(new RequestTransmission { Telegram = new EasywaveTelegram(sub.Address, sub.KeyCode) });
         }
 
         public override void Start()
         {
-            Log.Debug($"{nameof(EasywaveReceiver)} {Name} is starting...");
+            _log.Debug($"{nameof(EasywaveReceiver)} {Name} is starting...");
             _telegramSubscription = _bus.Subscribe((EasywaveTelegram t) => Receive(t));
             _onSubsciption = _bus.Subscribe(async (RequestOn msg) => await ProcessOnRequestAsync(msg).ConfigureAwait(false));
             _offSubsciption = _bus.Subscribe(async (RequestOff msg) => await ProcessOffRequest(msg).ConfigureAwait(false));
@@ -109,7 +113,7 @@ namespace Domain
 
         public override void Stop()
         {
-            Log.Debug($"{nameof(EasywaveReceiver)} {Name} is stopping...");
+            _log.Debug($"{nameof(EasywaveReceiver)} {Name} is stopping...");
             _telegramSubscription?.Dispose();
             _onSubsciption?.Dispose();
             _offSubsciption?.Dispose();

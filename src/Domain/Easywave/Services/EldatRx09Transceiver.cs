@@ -1,6 +1,5 @@
 ﻿using log4net;
 using MemBus;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Globalization;
 using System.IO.Ports;
@@ -17,7 +16,7 @@ namespace Domain
     /// </remarks>
     public sealed class EldatRx09Transceiver : AutohmationService
     {
-        private static readonly ILog _log = LogManager.GetLogger(typeof(EldatRx09Transceiver));
+        private readonly static ILog _log = LogManager.GetLogger(typeof(EldatRx09Transceiver));
         private readonly IBus _bus;
         private bool _isOpen;
         private readonly SerialPort _port;
@@ -102,7 +101,7 @@ namespace Domain
                 throw new InvalidOperationException($"Cannot transmit to address {message.Address}.  The adapter only supports {AddressCount} addresses.");
             }
 
-            string text = $"TXP,{message.Address:x2},{message.KeyCode}\r";
+            var text = $"TXP,{message.Address:x2},{message.KeyCode}\r";
             _log.Debug(">" + text);
             _port.Write(text);
             return _bus.PublishAsync(message);
@@ -149,17 +148,21 @@ namespace Domain
 
         private async void DataReceivedAsync(object sender, SerialDataReceivedEventArgs e)
         {
-            if (e.EventType != SerialData.Chars) return;
-            SerialPort port = (SerialPort)sender;
+            if (e.EventType != SerialData.Chars)
+            {
+                return;
+            }
+
+            var port = (SerialPort)sender;
             //Concat the new received characters to the unprocessed input of the previous read.
             //There is very little chance that there will ever be any unprocessed input, but just to be sure...
             _buffer = string.Concat(_buffer, port.ReadExisting());
-            string input = _buffer;
+            var input = _buffer;
             //Process the buffer line by line (each Easywave telegram ends with \r)
             var pos = input.IndexOf('\r');
             while (pos > 0)
             {
-                string line = input.Substring(0, pos).ToString();
+                var line = input.Substring(0, pos).ToString();
                 await ProcessLine(line).ConfigureAwait(false);
                 input = input[(pos + 1)..];
                 pos = input.IndexOf('\r');
@@ -175,7 +178,7 @@ namespace Domain
                 return;
             }
 
-            string[] parts = line.Split(',', '\t', '\r');
+            var parts = line.Split(',', '\t', '\r');
             if (parts.Length == 0)
             {
                 return;

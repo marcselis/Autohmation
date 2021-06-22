@@ -6,7 +6,7 @@
 
         public RequestOff(string switchName)
         {
-            this.SwitchName = switchName;
+            SwitchName = switchName;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace DomainTestCore
         private readonly IHostApplicationLifetime _lifetime;
         private Task? _loop;
         private CancellationTokenSource? _cancellationSource;
-        private bool disposedValue;
+        private bool _disposedValue;
 
         public Worker(IHouse house, ILogger<Worker> logger, IHostApplicationLifetime lifetime)
         {
@@ -66,7 +66,7 @@ namespace DomainTestCore
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -76,7 +76,7 @@ namespace DomainTestCore
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 
