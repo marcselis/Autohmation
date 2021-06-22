@@ -6,7 +6,7 @@ namespace Domain
     {
         private string _name;
 
-        public EasywaveButton(uint address) : this(address, $"Unkown {address}")
+        public EasywaveButton(uint address) : this(address, $"Unknown {address}")
         {
         }
 
@@ -19,7 +19,7 @@ namespace Domain
         public uint Address { get; set; }
         public string Name
         {
-            get => _name;
+            get { return _name; }
             set
             {
                 if (_name == value)
@@ -32,10 +32,11 @@ namespace Domain
             }
         }
 
-        public event EventHandler<string> NameChanged;
+        public event EventHandler<string>? NameChanged;
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             //Nothing to dispose
         }
 

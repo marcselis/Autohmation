@@ -17,35 +17,36 @@ namespace Domain
     /// </remarks>
     public sealed class EldatRx09Transceiver : AutohmationService
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(EldatRx09Transceiver));
+        private static readonly ILog _log = LogManager.GetLogger(typeof(EldatRx09Transceiver));
         private readonly IBus _bus;
-        private readonly string _portName;
         private bool _isOpen;
-        private SerialPort _port;
-        private string buffer = string.Empty;
-        private IDisposable _subscription;
+        private readonly SerialPort _port;
+        private string _buffer = string.Empty;
+        private IDisposable? _subscription;
 
         public EldatRx09Transceiver(string port, IBus bus) 
         {
-            if (string.IsNullOrWhiteSpace(port))
-            {
-                throw new ArgumentNullException(nameof(port));
-            }
-
             _bus = bus;
-            _portName = port;
+            _port = new SerialPort(port, 57600, Parity.None, 8, StopBits.One)
+            {
+                Handshake = Handshake.None,
+                DtrEnable = true,
+                RtsEnable = true
+            };
+            _port.DataReceived += DataReceivedAsync;
+            _port.ErrorReceived += ErrorReceived;
         }
 
         public override void Start()
         {
-            Log.Debug("EldatRx09Transceiver is starting...");
+            _log.Debug("EldatRx09Transceiver is starting...");
             _subscription = _bus.Subscribe(async (RequestTransmission req) => await TransmitAsync(req.Telegram).ConfigureAwait(false));
             Open();
         }
 
         public override void Stop()
         {
-            Log.Debug("EldatRx09Transceiver is stopping...");
+            _log.Debug("EldatRx09Transceiver is stopping...");
             _subscription?.Dispose();
             _subscription = null;
             Close();
@@ -58,14 +59,14 @@ namespace Domain
         /// <remarks>
         /// Works only after the transceiver is opened
         /// </remarks>
-        public string VendorId { get; private set; }
+        public string? VendorId { get; private set; }
         /// <summary>
         /// Gets the device id of the transceiver.
         /// </summary>
         /// <remarks>
         /// Works only after the transceiver is opened
         /// </remarks>
-        public string DeviceId { get; private set; }
+        public string? DeviceId { get; private set; }
         /// <summary>
         /// Returns the version number of the transceiver.
         /// </summary>
@@ -93,17 +94,16 @@ namespace Domain
         {
             if (!_isOpen)
             {
-                throw new NotSupportedException("Open the transceiver before transmitting");
+                throw new InvalidOperationException("Open the transceiver before transmitting");
             }
 
             if (message.Address >= AddressCount)
             {
-                throw new ArgumentOutOfRangeException(nameof(message.Address),
-                    $"Cannot transmit to address {message.Address}.  The adapter only supports {AddressCount} addresses.");
+                throw new InvalidOperationException($"Cannot transmit to address {message.Address}.  The adapter only supports {AddressCount} addresses.");
             }
 
             string text = $"TXP,{message.Address:x2},{message.KeyCode}\r";
-            Log.Debug(">" + text);
+            _log.Debug(">" + text);
             _port.Write(text);
             return _bus.PublishAsync(message);
         }
@@ -117,15 +117,7 @@ namespace Domain
         /// </remarks>
         private void Open()
         {
-            _port = new SerialPort(_portName, 57600, Parity.None, 8, StopBits.One)
-            {
-                Handshake = Handshake.None,
-                DtrEnable = true,
-                RtsEnable = true
-            };
-            _port.DataReceived += DataReceivedAsync;
-            _port.ErrorReceived += ErrorReceived;
-            _port.Open();
+             _port.Open();
             //Ask for number of addresses and vendor/device id.
             //The responses will be processed by the DataReceived 
             //method and will be used to initialize the AddressCount, VendorId, DeviceId & Version properties.
@@ -152,34 +144,32 @@ namespace Domain
 
         private static void ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
-            Log.Debug($"Error received from serial port: {e.EventType}");
+            _log.Debug($"Error received from serial port: {e.EventType}");
         }
 
         private async void DataReceivedAsync(object sender, SerialDataReceivedEventArgs e)
         {
-            if (e.EventType == SerialData.Chars) //no need to process if we received an EOF
+            if (e.EventType != SerialData.Chars) return;
+            SerialPort port = (SerialPort)sender;
+            //Concat the new received characters to the unprocessed input of the previous read.
+            //There is very little chance that there will ever be any unprocessed input, but just to be sure...
+            _buffer = string.Concat(_buffer, port.ReadExisting());
+            string input = _buffer;
+            //Process the buffer line by line (each Easywave telegram ends with \r)
+            var pos = input.IndexOf('\r');
+            while (pos > 0)
             {
-                SerialPort port = (SerialPort)sender;
-                //Concat the new received characters to the unprocessed input of the previous read.
-                //There is very little chance that there will ever be any unprocessed input, but just to be sure...
-                buffer = string.Concat(buffer, port.ReadExisting());
-                string input = buffer;
-                //Process the buffer line by line (each Easywave telegram ends with \r)
-                int pos = input.IndexOf('\r');
-                while (pos > 0)
-                {
-                    string line = input.Substring(0, pos).ToString();
-                    await ProcessLine(line).ConfigureAwait(false);
-                    input = input.Substring(pos +1);
-                    pos = input.IndexOf('\r');
-                }
-                buffer = input.ToString();
+                string line = input.Substring(0, pos).ToString();
+                await ProcessLine(line).ConfigureAwait(false);
+                input = input[(pos + 1)..];
+                pos = input.IndexOf('\r');
             }
+            _buffer = input.ToString();
         }
 
         private async Task ProcessLine(string line)
         {
-            Log.Debug($"<{line}");
+            _log.Debug($"<{line}");
             if (string.IsNullOrWhiteSpace(line))
             {
                 return;
@@ -197,21 +187,21 @@ namespace Domain
                     VendorId = parts[1];
                     DeviceId = parts[2];
                     Version = uint.Parse(parts[3], NumberStyles.HexNumber);
-                    Log.Debug($"Reveived ID {VendorId}:{DeviceId} Version {Version}");
+                    _log.Debug($"Reveived ID {VendorId}:{DeviceId} Version {Version}");
                     break;
                 case "GETP":
                     AddressCount = uint.Parse(parts[1], NumberStyles.HexNumber);
-                    Log.Debug($"Transceiver has {AddressCount} addresses");
+                    _log.Debug($"Transceiver has {AddressCount} addresses");
                     break;
                 case "REC":
-                    uint address = uint.Parse(parts[1], NumberStyles.HexNumber);
-                    KeyCode code = (KeyCode)Enum.Parse(typeof(KeyCode), parts[2]);
+                    var address = uint.Parse(parts[1], NumberStyles.HexNumber);
+                    var code = (KeyCode)Enum.Parse(typeof(KeyCode), parts[2]);
                     await _bus.PublishAsync(new EasywaveTelegram(address, code)).ConfigureAwait(false);
                     break;
                 case "OK":
                     break;
                 default:
-                    Log.Debug($"Unexpected input: {line}");
+                    _log.Debug($"Unexpected input: {line}");
                     break;
             }
         }

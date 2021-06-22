@@ -2,9 +2,8 @@
 {
     internal class SwitchedOn
     {
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public SwitchedOn() { }
 
         public SwitchedOn(string name)
         {

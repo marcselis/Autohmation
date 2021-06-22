@@ -12,8 +12,8 @@ namespace DomainTestCore
         private readonly IHouse _house;
         private readonly ILogger<Worker> _logger;
         private readonly IHostApplicationLifetime _lifetime;
-        private Task _loop;
-        private CancellationTokenSource _cancellationSource;
+        private Task? _loop;
+        private CancellationTokenSource? _cancellationSource;
         private bool disposedValue;
 
         public Worker(IHouse house, ILogger<Worker> logger, IHostApplicationLifetime lifetime)
@@ -32,16 +32,19 @@ namespace DomainTestCore
             return Task.CompletedTask;
         }
         
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Stopping worker");
             _house.Stop();
-            _cancellationSource.Cancel();
+            _cancellationSource?.Cancel();
             _lifetime.StopApplication();
-            return _loop;
+            if (_loop != null)
+            {
+                await _loop.ConfigureAwait(false);
+            }
         }
 
-        private void MainLoop(CancellationToken stoppingToken)
+        private async Task MainLoop(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -54,7 +57,7 @@ namespace DomainTestCore
                             Console.WriteLine("GOGOGOOG");
                             break;
                         case 'q':
-                            StopAsync(stoppingToken);
+                            await StopAsync(stoppingToken).ConfigureAwait(false);
                             break;
                     }
                 }
@@ -68,7 +71,7 @@ namespace DomainTestCore
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
-                    _cancellationSource.Dispose();
+                    _cancellationSource?.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

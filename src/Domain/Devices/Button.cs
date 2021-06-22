@@ -13,5 +13,9 @@ namespace Domain.Devices
         {
             throw new NotImplementedException();
         }
+
+        public Button(string name) : base(name)
+        {
+        }
     }
 }

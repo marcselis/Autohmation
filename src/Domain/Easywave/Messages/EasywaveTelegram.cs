@@ -1,6 +1,6 @@
 ﻿namespace Domain
 {
-    public struct EasywaveTelegram
+    public readonly struct EasywaveTelegram
     {
         public EasywaveTelegram(uint address, KeyCode keyCode)
         {

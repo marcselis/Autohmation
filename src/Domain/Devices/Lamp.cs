@@ -10,12 +10,11 @@ namespace Domain
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(Lamp));
         private readonly IBus _bus;
-        private IDisposable _onSubscription;
-        private IDisposable _offSubscription;
+        private IDisposable? _onSubscription;
+        private IDisposable? _offSubscription;
 
-        public Lamp(string name, string attachedTo, IBus bus)
+        public Lamp(string name, string attachedTo, IBus bus) : base(name)
         {
-            Name = name;
             _bus = bus;
             AttachedTo = attachedTo;
         }
@@ -37,7 +36,7 @@ namespace Domain
 
         public State State { get; private set; } = State.Off;
 
-        public event EventHandler<State> StateChanged;
+        public event EventHandler<State>? StateChanged;
 
 
         public override void Start()

@@ -29,13 +29,13 @@ namespace Domain.Services
 
         public void Start()
         {
-            foreach (T item in _list)
+            foreach (var item in _list)
                 item.Start();
         }
 
         public void Stop()
         {
-            foreach (T item in _list)
+            foreach (var item in _list)
                 item.Stop();
         }
     }

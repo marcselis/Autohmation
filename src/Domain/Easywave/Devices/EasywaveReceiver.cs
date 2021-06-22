@@ -13,22 +13,21 @@ namespace Domain
         private static readonly ILog Log = LogManager.GetLogger(typeof(EasywaveReceiver));
         private readonly List<Subscription> _subscriptions = new List<Subscription>();
         private State _state;
-        private IDisposable _telegramSubscription;
-        private IDisposable _onSubsciption;
-        private IDisposable _offSubsciption;
+        private IDisposable? _telegramSubscription;
+        private IDisposable? _onSubsciption;
+        private IDisposable? _offSubsciption;
         private readonly IBus _bus;
 
 
-        public EasywaveReceiver(string name, IBus bus, params Subscription[] subscription)
+        public EasywaveReceiver(string name, IBus bus, params Subscription[] subscription) : base(name)
         {
-            Name = name;
             _bus = bus;
             _subscriptions.AddRange(subscription);
         }
 
         public State State
         {
-            get => _state;
+            get { return _state; }
             private set
             {
                 if (_state == value)
@@ -49,7 +48,7 @@ namespace Domain
             }
         }
 
-         public IEnumerable<IEasywaveSubscription> Subscriptions => _subscriptions;
+        public IEnumerable<IEasywaveSubscription> Subscriptions => _subscriptions;
 
 
         private void Receive(EasywaveTelegram telegram)
@@ -73,7 +72,7 @@ namespace Domain
 
         public Task TurnOffAsync()
         { 
-            Subscription sub = _subscriptions.FirstOrDefault(s => s.IsFromTransceiver);
+            var sub = _subscriptions.FirstOrDefault(s => s.IsFromTransceiver);
             if (sub == null)
             {
                 throw new NotSupportedException("Receiver has no triggerable subscription");
@@ -91,7 +90,7 @@ namespace Domain
 
         public Task TurnOnAsync()
         { 
-            Subscription sub = _subscriptions.FirstOrDefault(s => s.IsFromTransceiver);
+            var sub = _subscriptions.FirstOrDefault(s => s.IsFromTransceiver);
             if (sub == null)
             {
                 throw new NotSupportedException("Receiver has no triggerable subscription");
@@ -111,9 +110,9 @@ namespace Domain
         public override void Stop()
         {
             Log.Debug($"{nameof(EasywaveReceiver)} {Name} is stopping...");
-            _telegramSubscription.Dispose();
-            _onSubsciption.Dispose();
-            _offSubsciption.Dispose();
+            _telegramSubscription?.Dispose();
+            _onSubsciption?.Dispose();
+            _offSubsciption?.Dispose();
         }
     }
 }

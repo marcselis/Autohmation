@@ -1,11 +1,11 @@
-﻿using log4net;
-using log4net.Repository;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Reflection;
+using log4net;
+using log4net.Repository;
+using Microsoft.Extensions.Logging;
 
-namespace DomainTestCore
+namespace DomainTest
 {
     public class Log4NetLogger : ILogger
     {
@@ -21,7 +21,7 @@ namespace DomainTestCore
             _skipDiagnosticLogs = skipDiagnosticLogs;
         }
 
-        public IDisposable BeginScope<TState>(TState state)
+        public IDisposable? BeginScope<TState>(TState state)
         {
             return null;
         }
@@ -60,31 +60,29 @@ namespace DomainTestCore
 
             string message = $"{formatter(state, exception)} {exception}";
 
-            if (!string.IsNullOrEmpty(message) || exception != null)
+            if (string.IsNullOrEmpty(message)) return;
+            switch (logLevel)
             {
-                switch (logLevel)
-                {
-                    case LogLevel.Critical:
-                        _log.Fatal(message);
-                        break;
-                    case LogLevel.Debug:
-                    case LogLevel.Trace:
-                        _log.Debug(message);
-                        break;
-                    case LogLevel.Error:
-                        _log.Error(message);
-                        break;
-                    case LogLevel.Information:
-                        _log.Info(message);
-                        break;
-                    case LogLevel.Warning:
-                        _log.Warn(message);
-                        break;
-                    default:
-                        _log.Warn($"Encountered unknown log level {logLevel}, writing out as Info.");
-                        _log.Info(message, exception);
-                        break;
-                }
+                case LogLevel.Critical:
+                    _log.Fatal(message);
+                    break;
+                case LogLevel.Debug:
+                case LogLevel.Trace:
+                    _log.Debug(message);
+                    break;
+                case LogLevel.Error:
+                    _log.Error(message);
+                    break;
+                case LogLevel.Information:
+                    _log.Info(message);
+                    break;
+                case LogLevel.Warning:
+                    _log.Warn(message);
+                    break;
+                default:
+                    _log.Warn($"Encountered unknown log level {logLevel}, writing out as Info.");
+                    _log.Info(message, exception);
+                    break;
             }
         }
 
