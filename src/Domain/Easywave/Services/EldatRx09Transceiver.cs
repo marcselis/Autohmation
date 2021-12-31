@@ -23,14 +23,15 @@ namespace Domain
         private string _buffer = string.Empty;
         private IDisposable? _subscription;
 
-        public EldatRx09Transceiver(string port, IBus bus) 
+        public EldatRx09Transceiver(string port, IBus bus)
         {
             _bus = bus;
             _port = new SerialPort(port, 57600, Parity.None, 8, StopBits.One)
             {
                 Handshake = Handshake.None,
                 DtrEnable = true,
-                RtsEnable = true
+                RtsEnable = true,
+                NewLine = "\r"
             };
             _port.DataReceived += DataReceivedAsync;
             _port.ErrorReceived += ErrorReceived;
@@ -101,9 +102,9 @@ namespace Domain
                 throw new InvalidOperationException($"Cannot transmit to address {message.Address}.  The adapter only supports {AddressCount} addresses.");
             }
 
-            var text = $"TXP,{message.Address:x2},{message.KeyCode}\r";
+            var text = $"TXP,{message.Address:x2},{message.KeyCode}";
             _log.Debug(">" + text);
-            _port.Write(text);
+            _port.WriteLine(text);
             return _bus.PublishAsync(message);
         }
 
@@ -116,12 +117,11 @@ namespace Domain
         /// </remarks>
         private void Open()
         {
-             _port.Open();
+            _port.Open();
             //Ask for number of addresses and vendor/device id.
             //The responses will be processed by the DataReceived 
             //method and will be used to initialize the AddressCount, VendorId, DeviceId & Version properties.
-            _port.Write("GETP?\r");
-            _port.Write("ID?\r");
+            _port.WriteLine("GETP?\rID?");
             _isOpen = true;
         }
 
@@ -152,22 +152,14 @@ namespace Domain
             {
                 return;
             }
-
+            
             var port = (SerialPort)sender;
-            //Concat the new received characters to the unprocessed input of the previous read.
-            //There is very little chance that there will ever be any unprocessed input, but just to be sure...
-            _buffer = string.Concat(_buffer, port.ReadExisting());
-            var input = _buffer;
-            //Process the buffer line by line (each Easywave telegram ends with \r)
-            var pos = input.IndexOf('\r');
-            while (pos > 0)
-            {
-                var line = input.Substring(0, pos).ToString();
+            var  line = port.ReadLine();
+            while(line.Length>0)
+            { 
                 await ProcessLine(line).ConfigureAwait(false);
-                input = input[(pos + 1)..];
-                pos = input.IndexOf('\r');
+                line = port.ReadLine();
             }
-            _buffer = input.ToString();
         }
 
         private async Task ProcessLine(string line)
@@ -178,7 +170,7 @@ namespace Domain
                 return;
             }
 
-            var parts = line.Split(',', '\t', '\r');
+            var parts = line.Split(',', '\t');
             if (parts.Length == 0)
             {
                 return;

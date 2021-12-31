@@ -2,6 +2,8 @@
 using log4net;
 using MemBus;
 using System.IO;
+using System.Xml;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Domain
@@ -10,9 +12,12 @@ namespace Domain
   {
     private readonly static ILog _log = LogManager.GetLogger(typeof(VirtualHouse));
 
-    private ICanStartAndStopList<IDevice> Devices { get; } = new DeviceList<IDevice>();
+    public DeviceList<IDevice> Devices { get; private set; } = new DeviceList<IDevice>();
 
-    private ICanStartAndStopList<IService> Services { get; } = new ServiceList<IService>();
+    public ServiceList<IService> Services { get; private set; } = new ServiceList<IService>();
+
+    private VirtualHouse()
+    { }
 
     public VirtualHouse(IBus bus)
     {
@@ -70,9 +75,13 @@ namespace Domain
       Devices.Stop();
       _log.Debug("Stopping services...");
       Services.Stop();
+      _log.Debug("Serializing");
       var ser = new XmlSerializer(typeof(VirtualHouse));
-      using var w = new StreamWriter(@"c:\temp\settings.xml");
-      ser.Serialize(w, this);
+      using (var w = new StreamWriter(@"c:\temp\settings.xml"))
+      {
+        ser.Serialize(w, this);
+      }
+
     }
 
     public void Start()
@@ -84,6 +93,5 @@ namespace Domain
       Devices.Start();
     }
 
-
-  }
+   }
 }
