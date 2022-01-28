@@ -1,3 +1,5 @@
+# This project is no longer maintained, as I switched to using Home Assistant and developed the [Easywave2MQTT](https://github.com/marcselis/Easywave2MQTT) for that.
+
 # Autohmation
 
 ## What is it?
